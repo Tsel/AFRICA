@@ -24,9 +24,10 @@ CaseVec = np.zeros(regions, dtype=int)
 #
 # generate the cases
 Cases = 100
-noCols2Consider = 2
+noCols2Consider = 13
 # repetitions
-rep=50
+rep=900
+blur = 0.01
 #
 # CaseMat considering noCols2Consider and reps will have 
 # noCols2Consider x rep rows
@@ -37,8 +38,10 @@ x = np.arange(regions)
 counter=0
 print 'I am generating the cases'
 for c in np.arange(noCols2Consider):
+    data[:,c] = data[:,c]*(1-blur)+blur
+    data[:,c] = data[:,c] / np.sum(data[:,c])
     CaseGenerator = vose.Vose(zip(x,data[:,c]))
-    print 'looking at product', c
+#    print 'looking at product', c
     for _ in range(rep):
         #print 'looking at col', c
         CaseList = [CaseGenerator.get() for _ in range(Cases)]
@@ -46,7 +49,7 @@ for c in np.arange(noCols2Consider):
         for f in CaseFreq.iterkeys():
             CaseMat[counter,f]=CaseFreq.get(f)
         
-        print CaseMat[counter].sum(), CaseMat[counter].max()
+        #print CaseMat[counter].sum(), CaseMat[counter].max()
         counter += 1
     
 print CaseMat.shape
@@ -54,6 +57,9 @@ print CaseMat
 
 
 #
-# save to file
+# save features to file
 np.savetxt('../Daten/FeatureMatrixC100.csv', CaseMat, delimiter=',', fmt='%d')
+#
+# create and save the targets
+np.savetxt('../Daten/TargetVectorC100.csv', np.repeat(np.arange(noCols2Consider),rep), fmt='%d')
 
